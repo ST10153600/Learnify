@@ -28,7 +28,7 @@ fun NavGraphScreen(
             HomeScreen(navController = navController, openDrawer = openDrawer)
         }
         composable(
-            route = "${Screen.Quiz.route}/{topic}/{level}",
+            route = Screen.Quiz.route,
             arguments = listOf(
                 navArgument("topic") {},
                 navArgument("level") {}
