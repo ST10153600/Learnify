@@ -18,10 +18,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class QuizQuestion(
-    val id: String,
-    val question: String,
-    val options: List<String>,
-    val correctAnswer: String,
+    val id: String = "",
+    val question: String = "",
+    val options: List<String> = emptyList(),
+    val correctAnswer: String = "",
     var isFlagged: Boolean = false,
     var isLiked: Boolean = false
 )

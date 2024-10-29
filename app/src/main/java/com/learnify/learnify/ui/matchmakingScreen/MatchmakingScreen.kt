@@ -25,6 +25,7 @@ fun MatchmakingScreen(navController: NavController) {
             },
             onError = { e ->
                 errorMessage = e.message
+                println(e.message)
             }
         )
     }
