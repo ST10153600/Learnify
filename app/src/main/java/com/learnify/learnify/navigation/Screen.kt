@@ -11,6 +11,6 @@ sealed class Screen(val route: String) {
         fun createRoute(score: Int) = "results_screen/$score"
     }
     data object FlaggedQuestions : Screen("flagged_questions_screen")
-    /*data object LikedQuestions : Screen("liked_questions_screen")
-    data object Profile : Screen("profile_screen")*/
+    data object LikedQuestions : Screen("liked_questions_screen")
+    data object Profile : Screen("profile_screen")
 }

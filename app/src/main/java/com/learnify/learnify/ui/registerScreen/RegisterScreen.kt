@@ -1,111 +1,128 @@
 package com.learnify.learnify.ui.registerScreen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.learnify.learnify.navigation.Screen
-import com.learnify.learnify.ui.loginScreen.AppLogo
+import com.learnify.learnify.services.FirebaseService
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun RegisterScreen(navController: NavController) {
-    val username = remember { mutableStateOf("") }
-    val email = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
-    val confirmPassword = remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        AppLogo("Register for an account")
-        Spacer(modifier = Modifier.height(32.dp))
-        OutlinedTextField(
-            value = username.value,
-            onValueChange = { username.value = it },
-            label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = email.value,
-            onValueChange = { email.value = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = null)
-                }
-            }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = confirmPassword.value,
-            onValueChange = { confirmPassword.value = it },
-            label = { Text("Confirm Password") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val image = if (confirmPasswordVisible)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
-
-                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                    Icon(imageVector = image, contentDescription = null)
-                }
-            }
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = {
-                navController.navigate(Screen.Home.route)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "Register", style = MaterialTheme.typography.titleMedium)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Already registered? Login here.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable {
-                navController.navigate(Screen.Login.route)
+            TextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation()
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    isLoading = true
+                    FirebaseService.auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                val user = FirebaseService.auth.currentUser
+                                val uid = user?.uid ?: ""
+                                val userData = hashMapOf(
+                                    "username" to username,
+                                    "email" to email
+                                )
+                                FirebaseService.firestore.collection("users").document(uid)
+                                    .set(userData, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        navController.navigate(Screen.Home.route) {
+                                            popUpTo(Screen.Register.route) { inclusive = true }
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        errorMessage = e.message
+                                    }
+                            } else {
+                                errorMessage = task.exception?.message
+                            }
+                        }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Register")
             }
-        )
+            Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Already have an account? Login")
+            }
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    isLoading = true
+                    FirebaseService.auth.signInAnonymously()
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Register.route) { inclusive = true }
+                                }
+                            } else {
+                                errorMessage = task.exception?.message
+                            }
+                        }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Continue as Guest")
+            }
+            Spacer(Modifier.height(8.dp))
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.learnify.learnify.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
@@ -16,7 +17,8 @@ import com.learnify.learnify.navigation.Screen
 @Composable
 fun DrawerContent(
     navController: NavController,
-    onDestinationClicked: (String) -> Unit
+    onDestinationClicked: (String) -> Unit,
+    onLogout: () -> Unit
 ) {
     ModalDrawerSheet {
         Column(
@@ -38,7 +40,7 @@ fun DrawerContent(
             selected = false,
             onClick = { onDestinationClicked(Screen.FlaggedQuestions.route) }
         )
-        /*NavigationDrawerItem(
+        NavigationDrawerItem(
             label = { Text("Liked Questions") },
             selected = false,
             onClick = { onDestinationClicked(Screen.LikedQuestions.route) }
@@ -49,18 +51,12 @@ fun DrawerContent(
             onClick = { onDestinationClicked(Screen.Profile.route) }
         )
         NavigationDrawerItem(
-            label = { Text("Rate this App") },
+            label = { Text("Logout") },
             selected = false,
             onClick = {
-                // We could open the Play Store link here, if you guys decide to take this further
+                onLogout()
+                onDestinationClicked(Screen.Login.route)
             }
         )
-        NavigationDrawerItem(
-            label = { Text("Feedback") },
-            selected = false,
-            onClick = {
-                // We could open a feedback form here, if you guys decide to take this further
-            }
-        )*/
     }
 }

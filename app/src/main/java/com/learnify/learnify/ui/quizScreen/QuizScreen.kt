@@ -12,16 +12,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.learnify.learnify.navigation.Screen
+import com.learnify.learnify.services.FirebaseService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class QuizQuestion(
+    val id: String,
     val question: String,
     val options: List<String>,
     val correctAnswer: String,
     var isFlagged: Boolean = false,
-    var isFavorited: Boolean = false
+    var isLiked: Boolean = false
 )
 
 @Composable
@@ -53,6 +55,7 @@ fun QuizScreen(navController: NavController, topic: String) {
     }
 
     if (isQuizOver) {
+        FirebaseService.addCompletedQuiz(topic)
         LaunchedEffect(Unit) {
             navController.navigate(Screen.Results.createRoute(correctAnswers)) {
                 popUpTo(Screen.Home.route) { inclusive = false }
@@ -102,12 +105,22 @@ fun QuizScreen(navController: NavController, topic: String) {
             QuizBottomBar(
                 timeLeft = timeLeft,
                 isFlagged = currentQuestion.isFlagged,
-                isFavorited = currentQuestion.isFavorited,
+                isLiked = currentQuestion.isLiked,
                 onFlagClick = {
                     currentQuestion.isFlagged = !currentQuestion.isFlagged
+                    if (currentQuestion.isFlagged) {
+                        FirebaseService.addFlaggedQuestion(currentQuestion.id)
+                    } else {
+                        FirebaseService.removeFlaggedQuestion(currentQuestion.id)
+                    }
                 },
-                onFavoriteClick = {
-                    currentQuestion.isFavorited = !currentQuestion.isFavorited
+                onLikeClick = {
+                    currentQuestion.isLiked = !currentQuestion.isLiked
+                    if (currentQuestion.isLiked) {
+                        FirebaseService.addLikedQuestion(currentQuestion.id)
+                    } else {
+                        FirebaseService.removeLikedQuestion(currentQuestion.id)
+                    }
                 }
             )
         }
@@ -118,15 +131,15 @@ fun QuizScreen(navController: NavController, topic: String) {
 fun QuizBottomBar(
     timeLeft: Int,
     isFlagged: Boolean,
-    isFavorited: Boolean,
+    isLiked: Boolean,
     onFlagClick: () -> Unit,
-    onFavoriteClick: () -> Unit
+    onLikeClick: () -> Unit
 ) {
     BottomAppBar(
         contentColor = MaterialTheme.colorScheme.onSurface,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
-        IconButton(onClick = { onFlagClick() }) {
+        IconButton(onClick = onFlagClick) {
             Icon(
                 imageVector = Icons.Default.Flag,
                 contentDescription = "Flag Question",
@@ -140,22 +153,24 @@ fun QuizBottomBar(
             modifier = Modifier.align(Alignment.CenterVertically)
         )
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = { onFavoriteClick() }) {
+        IconButton(onClick = onLikeClick) {
             Icon(
                 imageVector = Icons.Default.Favorite,
-                contentDescription = "Favorite Question",
-                tint = if (isFavorited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                contentDescription = "Like Question",
+                tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
         }
     }
 }
+
 
 fun generateTestQuestions(): List<QuizQuestion> {
     return List(20) { index ->
         QuizQuestion(
             question = "Sample Question ${index + 1}",
             options = listOf("Option A", "Option B", "Option C", "Option D"),
-            correctAnswer = "Option A"
+            correctAnswer = "Option A",
+            id = index.toString()
         )
     }
 }

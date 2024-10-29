@@ -8,6 +8,8 @@ import androidx.navigation.navArgument
 import com.learnify.learnify.ui.flaggedQuestionsScreen.FlaggedQuestionsScreen
 import com.learnify.learnify.ui.loginScreen.LoginScreen
 import com.learnify.learnify.ui.homeScreen.HomeScreen
+import com.learnify.learnify.ui.likedQuestionsScreen.LikedQuestionsScreen
+import com.learnify.learnify.ui.profileScreen.ProfileScreen
 import com.learnify.learnify.ui.quizScreen.QuizScreen
 import com.learnify.learnify.ui.registerScreen.RegisterScreen
 import com.learnify.learnify.ui.resultsScreen.ResultsScreen
@@ -15,9 +17,13 @@ import com.learnify.learnify.ui.resultsScreen.ResultsScreen
 @Composable
 fun NavGraphScreen(
     navController: NavHostController,
-    openDrawer: () -> Unit
+    openDrawer: () -> Unit,
+    isLoggedIn: Boolean,
+    onLogout: () -> Unit
 ) {
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
+    val startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(route = Screen.Login.route) {
             LoginScreen(navController = navController)
         }
@@ -44,11 +50,11 @@ fun NavGraphScreen(
         composable(route = Screen.FlaggedQuestions.route) {
             FlaggedQuestionsScreen(navController = navController, openDrawer = openDrawer)
         }
-        /*composable(route = Screen.LikedQuestions.route) {
+        composable(route = Screen.LikedQuestions.route) {
             LikedQuestionsScreen(navController = navController, openDrawer = openDrawer)
         }
         composable(route = Screen.Profile.route) {
             ProfileScreen(navController = navController, openDrawer = openDrawer)
-        }*/
+        }
     }
 }

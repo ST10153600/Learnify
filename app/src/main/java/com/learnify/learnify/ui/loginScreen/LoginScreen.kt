@@ -1,105 +1,106 @@
 package com.learnify.learnify.ui.loginScreen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.learnify.learnify.navigation.Screen
+import com.learnify.learnify.services.FirebaseService
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    val username = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        AppLogo("Login to your account")
-        Spacer(modifier = Modifier.height(32.dp))
-        OutlinedTextField(
-            value = username.value,
-            onValueChange = { username.value = it },
-            label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = null)
-                }
-            }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextButton(onClick = { /* Handle forgot password */ }) {
-            Text(
-                text = "Forgot Password?",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = {
-                navController.navigate(Screen.Home.route)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "Login", style = MaterialTheme.typography.titleMedium)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Don't have an account? Register here.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable {
-                navController.navigate(Screen.Register.route)
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation()
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    isLoading = true
+                    FirebaseService.auth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                }
+                            } else {
+                                errorMessage = task.exception?.message
+                            }
+                        }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Login")
             }
-        )
+            Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    navController.navigate(Screen.Register.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Don't have an account? Register")
+            }
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    isLoading = true
+                    FirebaseService.auth.signInAnonymously()
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                }
+                            } else {
+                                errorMessage = task.exception?.message
+                            }
+                        }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Continue as Guest")
+            }
+            Spacer(Modifier.height(8.dp))
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
-}
-
-@Composable
-fun AppLogo(
-    text: String,
-) {
-    Text(
-        text = "Learnify",
-        style = MaterialTheme.typography.displaySmall,
-        color = MaterialTheme.colorScheme.primary
-    )
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onBackground
-    )
 }
