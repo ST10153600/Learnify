@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,31 +43,37 @@ fun HomeScreen(
         )
 
         Surface(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(topics.size) { index ->
-                    val topic = topics[index]
-                    TopicCard(topic = topic) {
-                        navController.navigate(Screen.LevelSelection.createRoute(topic.name))
+            Column {
+                Button(
+                    onClick = {
+                        navController.navigate("matchmaking_screen")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text("Play Multiplayer")
+                }
+
+                // Optional Divider or Spacer for separation
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(topics) { topic ->
+                        TopicCard(topic = topic) {
+                            navController.navigate(Screen.LevelSelection.createRoute(topic.name))
+                        }
                     }
                 }
             }
-
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                navController.navigate("matchmaking_screen")
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Play Multiplayer")
         }
     }
 }
@@ -127,4 +134,3 @@ fun TopicCard(topic: Topic, onStartQuizClick: () -> Unit) {
         }
     }
 }
-
