@@ -52,7 +52,7 @@ fun HomeScreen(
                 items(topics.size) { index ->
                     val topic = topics[index]
                     TopicCard(topic = topic) {
-                        navController.navigate(Screen.Quiz.createRoute(topic.name))
+                        navController.navigate(Screen.LevelSelection.createRoute(topic.name))
                     }
                 }
             }

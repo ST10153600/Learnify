@@ -27,10 +27,10 @@ data class QuizQuestion(
 )
 
 @Composable
-fun QuizScreen(navController: NavController, topic: String) {
-    val questions = remember { generateTestQuestions() }
+fun QuizScreen(navController: NavController, topic: String, level: String) {
+    val questions = remember { generateTestQuestions(level) }
     var currentQuestionIndex by remember { mutableStateOf(0) }
-    var timeLeft by remember { mutableStateOf(10) }
+    var timeLeft by remember { mutableStateOf(getTimePerQuestion(level)) }
     var timerJob by remember { mutableStateOf<Job?>(null) }
     val coroutineScope = rememberCoroutineScope()
     var isQuizOver by remember { mutableStateOf(false) }
@@ -40,7 +40,7 @@ fun QuizScreen(navController: NavController, topic: String) {
 
     LaunchedEffect(currentQuestionIndex) {
         timerJob?.cancel()
-        timeLeft = 10
+        timeLeft = getTimePerQuestion(level)
         timerJob = coroutineScope.launch {
             while (timeLeft > 0) {
                 delay(1000L)
@@ -139,7 +139,7 @@ fun QuizBottomBar(
         contentColor = MaterialTheme.colorScheme.onSurface,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
-        IconButton(onClick = onFlagClick) {
+        IconButton(onClick = { onFlagClick() }) {
             Icon(
                 imageVector = Icons.Default.Flag,
                 contentDescription = "Flag Question",
@@ -153,7 +153,7 @@ fun QuizBottomBar(
             modifier = Modifier.align(Alignment.CenterVertically)
         )
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = onLikeClick) {
+        IconButton(onClick = { onLikeClick() }) {
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Like Question",
@@ -163,14 +163,55 @@ fun QuizBottomBar(
     }
 }
 
+fun getTimePerQuestion(level: String): Int {
+    return when (level) {
+        "Beginner" -> 20
+        "Intermediate" -> 15
+        "Hard" -> 6
+        else -> 20
+    }
+}
 
-fun generateTestQuestions(): List<QuizQuestion> {
-    return List(20) { index ->
+fun generateTestQuestions(level: String): List<QuizQuestion> {
+    return when (level) {
+        "Beginner" -> generateBeginnerQuestions()
+        "Intermediate" -> generateIntermediateQuestions()
+        "Hard" -> generateHardQuestions()
+        else -> generateBeginnerQuestions()
+    }
+}
+
+// TODO: YOU CAN ADD YOUR DIFFERENT QUESTIONS HERE!!! USE QuizQuestions() as one component per question ///
+
+fun generateBeginnerQuestions(): List<QuizQuestion> {
+    return List(10) { index ->
         QuizQuestion(
-            question = "Sample Question ${index + 1}",
+            id = "B$index",
+            question = "Beginner Question ${index + 1}",
             options = listOf("Option A", "Option B", "Option C", "Option D"),
-            correctAnswer = "Option A",
-            id = index.toString()
+            correctAnswer = "Option A"
+        )
+    }
+}
+
+fun generateIntermediateQuestions(): List<QuizQuestion> {
+    return List(10) { index ->
+        QuizQuestion(
+            id = "I$index",
+            question = "Intermediate Question ${index + 1}",
+            options = listOf("Option A", "Option B", "Option C", "Option D"),
+            correctAnswer = "Option B"
+        )
+    }
+}
+
+fun generateHardQuestions(): List<QuizQuestion> {
+    return List(10) { index ->
+        QuizQuestion(
+            id = "H$index",
+            question = "Hard Question ${index + 1}",
+            options = listOf("Option A", "Option B", "Option C", "Option D"),
+            correctAnswer = "Option C"
         )
     }
 }

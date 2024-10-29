@@ -8,6 +8,7 @@ import androidx.navigation.navArgument
 import com.learnify.learnify.ui.flaggedQuestionsScreen.FlaggedQuestionsScreen
 import com.learnify.learnify.ui.loginScreen.LoginScreen
 import com.learnify.learnify.ui.homeScreen.HomeScreen
+import com.learnify.learnify.ui.levelSelectionScreen.LevelSelectionScreen
 import com.learnify.learnify.ui.likedQuestionsScreen.LikedQuestionsScreen
 import com.learnify.learnify.ui.profileScreen.ProfileScreen
 import com.learnify.learnify.ui.quizScreen.QuizScreen
@@ -34,11 +35,22 @@ fun NavGraphScreen(
             HomeScreen(navController = navController, openDrawer = openDrawer)
         }
         composable(
-            route = Screen.Quiz.route,
+            route = Screen.LevelSelection.route,
             arguments = listOf(navArgument("topic") {})
         ) { backStackEntry ->
             val topic = backStackEntry.arguments?.getString("topic") ?: "General"
-            QuizScreen(navController = navController, topic = topic)
+            LevelSelectionScreen(navController = navController, topic = topic)
+        }
+        composable(
+            route = Screen.Quiz.route,
+            arguments = listOf(
+                navArgument("topic") {},
+                navArgument("level") {}
+            )
+        ) { backStackEntry ->
+            val topic = backStackEntry.arguments?.getString("topic") ?: "General"
+            val level = backStackEntry.arguments?.getString("level") ?: "Beginner"
+            QuizScreen(navController = navController, topic = topic, level = level)
         }
         composable(
             route = Screen.Results.route,
