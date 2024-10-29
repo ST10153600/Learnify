@@ -10,6 +10,9 @@ import com.learnify.learnify.ui.loginScreen.LoginScreen
 import com.learnify.learnify.ui.homeScreen.HomeScreen
 import com.learnify.learnify.ui.levelSelectionScreen.LevelSelectionScreen
 import com.learnify.learnify.ui.likedQuestionsScreen.LikedQuestionsScreen
+import com.learnify.learnify.ui.matchmakingScreen.MatchmakingScreen
+import com.learnify.learnify.ui.multiplayerQuizScreen.MultiplayerQuizScreen
+import com.learnify.learnify.ui.multiplayerResultsScreen.MultiplayerResultsScreen
 import com.learnify.learnify.ui.profileScreen.ProfileScreen
 import com.learnify.learnify.ui.quizScreen.QuizScreen
 import com.learnify.learnify.ui.registerScreen.RegisterScreen
@@ -67,6 +70,23 @@ fun NavGraphScreen(
         }
         composable(route = Screen.Profile.route) {
             ProfileScreen(navController = navController, openDrawer = openDrawer)
+        }
+        composable(route = "matchmaking_screen") {
+            MatchmakingScreen(navController = navController)
+        }
+        composable(
+            route = "multiplayer_quiz_screen/{gameId}",
+            arguments = listOf(navArgument("gameId") {})
+        ) { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
+            MultiplayerQuizScreen(navController = navController, gameId = gameId)
+        }
+        composable(
+            route = "multiplayer_results_screen/{gameId}",
+            arguments = listOf(navArgument("gameId") {})
+        ) { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
+            MultiplayerResultsScreen(navController = navController, gameId = gameId)
         }
     }
 }

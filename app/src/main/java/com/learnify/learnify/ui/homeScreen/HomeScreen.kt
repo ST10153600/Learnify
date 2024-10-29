@@ -56,6 +56,17 @@ fun HomeScreen(
                     }
                 }
             }
+
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("matchmaking_screen")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Play Multiplayer")
         }
     }
 }
