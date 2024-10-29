@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.learnify.learnify.ui.editProfileScreen.EditProfileScreen
 import com.learnify.learnify.ui.flaggedQuestionsScreen.FlaggedQuestionsScreen
 import com.learnify.learnify.ui.loginScreen.LoginScreen
 import com.learnify.learnify.ui.homeScreen.HomeScreen
@@ -92,6 +93,9 @@ fun NavGraphScreen(
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
             MultiplayerResultsScreen(navController = navController, gameId = gameId)
+        }
+        composable(route = Screen.EditProfile.route) {
+            EditProfileScreen(navController = navController)
         }
     }
 }
