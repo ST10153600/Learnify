@@ -10,8 +10,8 @@ sealed class Screen(val route: String) {
     data object Quiz : Screen("quiz_screen/{topic}/{level}") {
         fun createRoute(topic: String, level: String) = "quiz_screen/$topic/$level"
     }
-    data object Results : Screen("results_screen/{score}") {
-        fun createRoute(score: Int) = "results_screen/$score"
+    data object Results : Screen("results_screen/{score}/{total}") {
+        fun createRoute(score: Int, total: Int) = "results_screen/$score/$total"
     }
     data object FlaggedQuestions : Screen("flagged_questions_screen")
     data object LikedQuestions : Screen("liked_questions_screen")

@@ -2,6 +2,7 @@ package com.learnify.learnify.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -57,10 +58,14 @@ fun NavGraphScreen(
         }
         composable(
             route = Screen.Results.route,
-            arguments = listOf(navArgument("score") { defaultValue = 0 })
+            arguments = listOf(
+                navArgument("score") { type = NavType.IntType },
+                navArgument("total") { type = NavType.IntType }
+            )
         ) { backStackEntry ->
-            val score = backStackEntry.arguments?.getString("score")?.toIntOrNull() ?: 0
-            ResultsScreen(navController = navController, score = score)
+            val score = backStackEntry.arguments?.getInt("score") ?: 0
+            val total = backStackEntry.arguments?.getInt("total") ?: 0
+            ResultsScreen(navController = navController, score = score, total = total)
         }
         composable(route = Screen.FlaggedQuestions.route) {
             FlaggedQuestionsScreen(navController = navController, openDrawer = openDrawer)

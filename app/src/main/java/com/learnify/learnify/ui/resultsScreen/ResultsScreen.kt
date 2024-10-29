@@ -16,9 +16,27 @@ import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
 import nl.dionsegijn.konfetti.core.models.Size
 import java.util.concurrent.TimeUnit
+import android.util.Log
 
 @Composable
-fun ResultsScreen(navController: NavController, score: Int) {
+fun ResultsScreen(navController: NavController, score: Int, total: Int) {
+    Log.d("ResultsScreen", "Received score: $score out of $total")
+
+    val highScoreThreshold = 80
+    val averageScoreThreshold = 50
+
+    val highScoreMessage = "Excellent work! You're a quiz master!"
+    val averageScoreMessage = "Good effort! Keep practicing to improve."
+    val lowScoreMessage = "Don't give up! Try again to boost your score."
+    val allCongratsMessage = "Congratulations to all participants!"
+
+    val scorePercentage = if (total > 0) (score.toDouble() / total) * 100 else 0.0
+    val resultMessage = when {
+        scorePercentage >= highScoreThreshold -> highScoreMessage
+        scorePercentage >= averageScoreThreshold -> averageScoreMessage
+        else -> lowScoreMessage
+    }
+
     val confettiColors = listOf(
         MaterialTheme.colorScheme.primary,
         MaterialTheme.colorScheme.secondary,
@@ -48,6 +66,7 @@ fun ResultsScreen(navController: NavController, score: Int) {
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
+            // Display confetti
             KonfettiView(
                 parties = listOf(party),
                 modifier = Modifier.fillMaxSize()
@@ -58,20 +77,20 @@ fun ResultsScreen(navController: NavController, score: Int) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Congratulations!",
+                    text = resultMessage,
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "You've completed the quiz.",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Your Score: $score/$total",
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Your Score: $score/${20}", // Assuming 20 questions
-                    style = MaterialTheme.typography.titleLarge,
+                    text = "Score Percentage: ${"%.2f".format(scorePercentage)}%",
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(32.dp))

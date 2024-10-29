@@ -1,5 +1,6 @@
 package com.learnify.learnify.ui.quizScreen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -53,13 +54,25 @@ fun QuizScreen(navController: NavController, topic: String, level: String) {
             }
         }
     }
-
     if (isQuizOver) {
         FirebaseService.addCompletedQuiz(topic)
-        LaunchedEffect(Unit) {
-            navController.navigate(Screen.Results.createRoute(correctAnswers)) {
-                popUpTo(Screen.Home.route) { inclusive = false }
+        Log.d("QuizScreen", "Quiz Over. Correct Answers: $correctAnswers")
+        val totalQuestions = questions.size
+        LaunchedEffect(isQuizOver) {
+            if (isQuizOver) {
+                navController.navigate(Screen.Results.createRoute(correctAnswers, totalQuestions)) {
+                    popUpTo(Screen.Home.route) { inclusive = false }
+                }
             }
+        }
+    }
+
+    if (isQuizOver) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
     } else {
         Column(
